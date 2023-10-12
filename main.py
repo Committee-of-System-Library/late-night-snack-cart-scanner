@@ -6,11 +6,14 @@ import winsound as ws
 import time
 
 
-cap = cv2.VideoCapture(0)
-scanned_id_list = deque()
-scan_time = 0
+def confirm_student(student_id, scanned_id_list) -> None:
+    """학생 인증 확인 함수
 
-def confirm_student(student_id):
+    Args:
+        student_id (int): 학생의 학번
+        scanned_id_list (deque): 인증된 학생의 학번 리스트
+    """
+    
     ws.Beep(1000, 100)
     
     scanned_id_list.append(student_id)
@@ -22,7 +25,13 @@ def confirm_student(student_id):
     print('인증되었습니다.')
     print('----------------------------------\n')
     
-def deny_overlap_student(student_id):
+def deny_overlap_student(student_id) -> None:
+    """학생 중복 인증 거부 함수
+
+    Args:
+        student_id (int): 학생의 학번
+    """
+    
     ws.Beep(500, 50)
     ws.Beep(500, 50)
     
@@ -32,6 +41,11 @@ def deny_overlap_student(student_id):
 
 
 if __name__ == '__main__':
+    cap = cv2.VideoCapture(0)
+    scanned_id_list = deque()
+    scan_time = 0
+
+
     try:
         with open('student_id.txt', 'r+') as f:
             for line in f.readlines():
@@ -56,7 +70,7 @@ if __name__ == '__main__':
                 student_id = obj.data.decode('utf-8')[:10]
                 if student_id not in scanned_id_list:
                     scan_time = time.time()
-                    confirm_student(student_id)
+                    confirm_student(student_id, scanned_id_list)
                     
                 elif student_id in scanned_id_list and time.time() - scan_time > 3:
                     scan_time = time.time()
