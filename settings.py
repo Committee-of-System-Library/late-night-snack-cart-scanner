@@ -4,16 +4,20 @@ from tkinter import filedialog
 
 class Settings:
     def __init__(self, db_path, num_of_cam, cam_num, stu_fee_check):
+        self.db_path = db_path
+        self.num_of_cam = num_of_cam
+        self.cam_num = cam_num
+        self.stu_fee_check = stu_fee_check
+        
         self.db_path_entry = None
         self.cam_num_cb = None
         self.stu_fee_check_cb = None
         
-        self.num_of_cam = num_of_cam
         
     def browse_db_path(self):
-        db_path = filedialog.askopenfilename(initialdir = "./", title = "Select a File", filetypes = (("csv files", "*.csv"), ("xml files", "*.xml"), ("all files", "*.*")))
+        self.db_path = filedialog.askopenfilename(initialdir = "./", title = "Select a File", filetypes = (("csv files", "*.csv"), ("xml files", "*.xml"), ("all files", "*.*")))
         self.db_path_entry.delete(0, END)
-        self.db_path_entry.insert(0, db_path)
+        self.db_path_entry.insert(0, self.db_path)
         
     def set_window(self):
         self.window = Tk()
@@ -65,9 +69,9 @@ class Settings:
         self.window.mainloop()
         
     def start(self):
-        db_path = self.db_path_entry.get()
-        cam_num = self.cam_num_cb.get()
-        stu_fee_check = self.stu_fee_check_cb.get()
+        self.db_path = self.db_path_entry.get()
+        self.cam_num = int(self.cam_num_cb.get())
+        self.stu_fee_check = self.stu_fee_check_cb.get()
         
         self.window.destroy()
         

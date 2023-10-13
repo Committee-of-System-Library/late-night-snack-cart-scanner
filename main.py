@@ -76,14 +76,23 @@ def deny_unknown_student(student_id) -> None:
 
 
 if __name__ == '__main__':
-    db_path = '../student_list.csv'
+    db_path = ''
+    cam_num = 0
+    stu_fee_check = ''
+    
+    settings = Settings(db_path, get_num_of_cam(), cam_num, stu_fee_check)
+    settings.display()
+    
+    db_path = settings.db_path
+    cam_num = settings.cam_num
+    stu_fee_check = settings.stu_fee_check
     
     db = pd.read_csv(db_path, usecols=[1, 2, 3])\
             .dropna(subset=['student_id'])
             
     student_id_list = db['student_id'].tolist()
     
-    cap = cv2.VideoCapture(0)
+    cap = cv2.VideoCapture(cam_num)
     scanned_id_list = deque()
     scan_time = 0
 
