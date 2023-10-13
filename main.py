@@ -54,6 +54,22 @@ def get_num_of_cam() -> int:
             
     return num_of_cam
 
+def is_dues_checked(student_fee_check: bool, student_id: int) -> bool:
+    """회비 납부 확인 함수
+
+    Args:
+        student_fee_check (bool): 회비 납부 확인 여부
+        student_id (int): 학생의 학번
+
+    Returns:
+        bool: 회비 납부 여부
+    """
+    
+    if not student_fee_check:
+        return True
+    else:
+        return True if db[db['student_id'] == str(student_id)]['dues'].tolist()[0] == 1 else False
+
 def confirm_student(student_id: int, scanned_id_list: deque) -> None:
     """학생 인증 확인 함수
 
@@ -71,6 +87,20 @@ def confirm_student(student_id: int, scanned_id_list: deque) -> None:
     
     print(f'학번 : {student_id}')
     print('인증되었습니다.')
+    print('----------------------------------\n')
+    
+def deny_dues_not_paid(student_id: int) -> None:
+    """미납 회비 거부 함수
+
+    Args:
+        student_id (int): 학생의 학번
+    """
+    
+    ws.Beep(1500, 50)
+    ws.Beep(1500, 50)
+    
+    print(f'학번 : {student_id}')
+    print('회비 미납부 학생입니다.')
     print('----------------------------------\n')
     
 def deny_overlap_student(student_id: int) -> None:
@@ -130,9 +160,15 @@ if __name__ == '__main__':
         for obj in decodedObjects:
             if obj.type == 'QRCODE':
                 student_id = obj.data.decode('utf-8')[:10]
-                if student_id not in scanned_id_list and student_id in student_id_list:
+                if is_dues_checked(student_fee_check, student_id) and \
+                        student_id not in scanned_id_list and \
+                        student_id in student_id_list:
                     scan_time = time.time()
                     confirm_student(student_id, scanned_id_list)
+                    
+                elif not is_dues_checked(student_fee_check, student_id) and time.time() - scan_time > 3:
+                    scan_time = time.time()
+                    deny_dues_not_paid(student_id)
                     
                 elif student_id in scanned_id_list and time.time() - scan_time > 3:
                     scan_time = time.time()
