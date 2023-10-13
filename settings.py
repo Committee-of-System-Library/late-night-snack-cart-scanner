@@ -71,7 +71,7 @@ class Settings:
     def start(self):
         self.db_path = self.db_path_entry.get()
         self.cam_num = int(self.cam_num_cb.get())
-        self.stu_fee_check = self.stu_fee_check_cb.get()
+        self.stu_fee_check = False if self.stu_fee_check_cb.get() == "미납" else True
         
         self.window.destroy()
         

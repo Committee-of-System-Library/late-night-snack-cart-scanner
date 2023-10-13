@@ -11,6 +11,32 @@ import pandas as pd
 import sys
 
 
+def config_settings() -> tuple(str, int, bool, cv2.VideoCapture, pd.DataFrame, list):
+    """프로그램 설정 함수
+
+    Returns:
+        tuple(str, int, bool, cv2.VideoCapture, pd.DataFrame, list): 설정된 데이터베이스 경로, 카메라 번호, 회비 납부 확인 여부, 카메라 객체, 데이터베이스, 학생의 학번 리스트
+    """
+    
+    db_path = ''
+    cam_num = 0
+    stu_fee_check = ''
+    
+    settings = Settings(db_path, get_num_of_cam(), cam_num, stu_fee_check)
+    settings.display()
+    
+    db_path = settings.db_path
+    cam_num = settings.cam_num
+    stu_fee_check = settings.stu_fee_check
+    
+    cap = cv2.VideoCapture(cam_num)
+    
+    db = pd.read_csv(db_path, usecols=[1, 2, 3]).dropna(subset=['student_id'])
+    student_id_list = db['student_id'].tolist()
+    
+    return (db_path, cam_num, stu_fee_check, cap, db, student_id_list)
+
+
 def get_num_of_cam() -> int:
     """연결된 카메라 개수 확인 함수
 
@@ -76,23 +102,8 @@ def deny_unknown_student(student_id) -> None:
 
 
 if __name__ == '__main__':
-    db_path = ''
-    cam_num = 0
-    stu_fee_check = ''
+    db_path, cam_num, stu_fee_check, cap, db, student_id_list = config_settings()
     
-    settings = Settings(db_path, get_num_of_cam(), cam_num, stu_fee_check)
-    settings.display()
-    
-    db_path = settings.db_path
-    cam_num = settings.cam_num
-    stu_fee_check = settings.stu_fee_check
-    
-    db = pd.read_csv(db_path, usecols=[1, 2, 3])\
-            .dropna(subset=['student_id'])
-            
-    student_id_list = db['student_id'].tolist()
-    
-    cap = cv2.VideoCapture(cam_num)
     scanned_id_list = deque()
     scan_time = 0
 
