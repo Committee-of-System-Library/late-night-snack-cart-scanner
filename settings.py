@@ -3,15 +3,15 @@ import tkinter.ttk as ttk
 from tkinter import filedialog
 
 class Settings:
-    def __init__(self, db_path, num_of_cam, cam_num, stu_fee_check):
+    def __init__(self, db_path, num_of_cam, cam_num, student_fee_check):
         self.db_path = db_path
         self.num_of_cam = num_of_cam
         self.cam_num = cam_num
-        self.stu_fee_check = stu_fee_check
+        self.student_fee_check = student_fee_check
         
         self.db_path_entry = None
         self.cam_num_cb = None
-        self.stu_fee_check_cb = None
+        self.student_fee_check_cb = None
         
         
     def browse_db_path(self):
@@ -48,13 +48,13 @@ class Settings:
         
         
         # 회비 납부 확인 여부
-        stu_fee_check_frame = LabelFrame(self.window, text="회비 납부 확인 여부")
-        stu_fee_check_frame.pack(fill="both", expand=True)
+        student_fee_check_frame = LabelFrame(self.window, text="회비 납부 확인 여부")
+        student_fee_check_frame.pack(fill="both", expand=True)
         
-        stu_fee_check = ["미납", "납부"]
-        self.stu_fee_check_cb = ttk.Combobox(stu_fee_check_frame, height=5, state="readonly", values=stu_fee_check)
-        self.stu_fee_check_cb.pack()
-        self.stu_fee_check_cb.current(0)
+        student_fee_check = ["미납", "납부"]
+        self.student_fee_check_cb = ttk.Combobox(student_fee_check_frame, height=5, state="readonly", values=student_fee_check)
+        self.student_fee_check_cb.pack()
+        self.student_fee_check_cb.current(0)
         
         
         # 프로그램 실행 버튼
@@ -71,7 +71,7 @@ class Settings:
     def start(self):
         self.db_path = self.db_path_entry.get()
         self.cam_num = int(self.cam_num_cb.get())
-        self.stu_fee_check = False if self.stu_fee_check_cb.get() == "미납" else True
+        self.student_fee_check = False if self.student_fee_check_cb.get() == "미납" else True
         
         self.window.destroy()
         
