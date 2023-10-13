@@ -1,205 +1,30 @@
-import cv2
-import pyzbar.pyzbar as pyzbar
-
-from settings import Settings
-
-from collections import deque
-import winsound as ws
-import time
-import pandas as pd
-
-import sys
+from check_process import *
 
 
-def config_settings() -> tuple:
-    """프로그램 설정 함수
+db_path, cam_num, student_fee_check, cap, db, student_id_list = config_settings()
 
-    Returns:
-        tuple(str, int, bool, cv2.VideoCapture, pd.DataFrame, list): 설정된 데이터베이스 경로, 카메라 번호, 회비 납부 확인 여부, 카메라 객체, 데이터베이스, 학생의 학번 리스트
-    """
-    
-    db_path = ''
-    cam_num = 0
-    student_fee_check = ''
-    
-    settings = Settings(db_path, get_num_of_cam(), cam_num, student_fee_check)
-    settings.display()
-    
-    db_path = settings.db_path
-    cam_num = settings.cam_num
-    student_fee_check = settings.student_fee_check
-    
-    cap = cv2.VideoCapture(cam_num)
-    
-    db = pd.read_csv(db_path, usecols=[1, 2, 3]).dropna(subset=['student_id'])
-    student_id_list = db['student_id'].tolist()
-    
-    return (db_path, cam_num, student_fee_check, cap, db, student_id_list)
-
-def set_pre_scanned_id_list() -> deque:
-    """이전에 인증된 학생의 학번 리스트 설정 함수
-
-    Returns:
-        deque: 이전에 인증된 학생의 학번 리스트
-    """
-    
-    scanned_id_list = deque()
-    
-    try:
-        with open('student_id.txt', 'r+') as f:
-            for line in f.readlines():
-                scanned_id_list.append(line.strip())
-    except FileNotFoundError:
-        with open('student_id.txt', 'w') as f:
-            pass
-            
-    return scanned_id_list
-
-def get_num_of_cam() -> int:
-    """연결된 카메라 개수 확인 함수
-
-    Returns:
-        int: 연결된 카메라 개수
-    """
-    
-    num_of_cam = 0
-    while True:
-        cap = cv2.VideoCapture(num_of_cam)
-        if not cap.read()[0]:
-            break
-        num_of_cam += 1
-        cap.release()
-            
-    return num_of_cam
-
-def is_dues_checked(student_fee_check: bool, student_id: int) -> bool:
-    """회비 납부 확인 함수
-
-    Args:
-        student_fee_check (bool): 회비 납부 확인 여부
-        student_id (int): 학생의 학번
-
-    Returns:
-        bool: 회비 납부 여부
-    """
-    
-    if not student_fee_check:
-        return True
-    else:
-        return True if db[db['student_id'] == str(student_id)]['dues'].tolist()[0] == 1 else False
-
-def confirm_student(student_id: int, scanned_id_list: deque) -> None:
-    """학생 인증 확인 함수
-
-    Args:
-        student_id (int): 학생의 학번
-        scanned_id_list (deque): 인증된 학생의 학번 리스트
-    """
-    
-    ws.Beep(1000, 100)
-    
-    scanned_id_list.append(student_id)
-    
-    with open('student_id.txt', 'a+') as f:
-        f.write(student_id + '\n')
-    
-    print(f'학번 : {student_id}')
-    print('인증되었습니다.')
-    print('----------------------------------\n')
-    
-def deny_dues_not_paid(student_id: int) -> None:
-    """미납 회비 거부 함수
-
-    Args:
-        student_id (int): 학생의 학번
-    """
-    
-    ws.Beep(1500, 50)
-    ws.Beep(1500, 50)
-    
-    print(f'학번 : {student_id}')
-    print('회비 미납부 학생입니다.')
-    print('----------------------------------\n')
-    
-def deny_overlap_student(student_id: int) -> None:
-    """학생 중복 인증 거부 함수
-
-    Args:
-        student_id (int): 학생의 학번
-    """
-    
-    ws.Beep(500, 50)
-    ws.Beep(500, 50)
-    
-    print(f'학번 : {student_id}')
-    print('이미 배부받은 학생입니다.')
-    print('----------------------------------\n')
-    
-def deny_unknown_student(student_id: int) -> None:
-    """학생 미인증 거부 함수
-
-    Args:
-        student_id (int): 학생의 학번
-    """
-    
-    ws.Beep(1500, 400)
-    
-    print(f'학번 : {student_id}')
-    print('미등록 학생입니다.')
-    print('----------------------------------\n')
-    
-def check_student_id(student_id: int, scan_time: time) -> None:
-    """학생 인증 확인 함수
-
-    Args:
-        student_id (int): 학생의 학번
-        scan_time (time): QR코드 스캔 시간
-    """
-    
-    is_registered = student_id in student_id_list
-    
-    if is_registered:
-        is_dues_paid = is_dues_checked(student_fee_check, student_id)
-        is_scanned = student_id in scanned_id_list
+scanned_id_list = set_pre_scanned_id_list()
+scan_time = 0
         
-        if is_dues_paid:
-            if not is_scanned:
-                confirm_student(student_id, scanned_id_list)
-            elif time.time() - scan_time > 3:
-                deny_overlap_student(student_id)
-        else:
-            if time.time() - scan_time > 3:
-                deny_dues_not_paid(student_id)
-    else:
-        if time.time() - scan_time > 3:
-            deny_unknown_student(student_id)
-
-
-if __name__ == '__main__':
-    db_path, cam_num, student_fee_check, cap, db, student_id_list = config_settings()
+        
+while True:
+    _, frame = cap.read()
+    frame = cv2.flip(frame, 1)
     
-    scanned_id_list = set_pre_scanned_id_list()
-    scan_time = 0
-            
-            
-    while True:
-        _, frame = cap.read()
-        frame = cv2.flip(frame, 1)
-        
-        cv2.namedWindow('QR Code Scanner', cv2.WINDOW_NORMAL)
-        cv2.imshow("QR Code Scanner", frame)
-        
-        decodedObjects = pyzbar.decode(frame)
-        key = cv2.waitKey(1)
+    cv2.namedWindow('QR Code Scanner', cv2.WINDOW_NORMAL)
+    cv2.imshow("QR Code Scanner", frame)
+    
+    decodedObjects = pyzbar.decode(frame)
+    key = cv2.waitKey(1)
 
-        for obj in decodedObjects:
-            if obj.type == 'QRCODE':
-                student_id = obj.data.decode('utf-8')[:10]
-                check_student_id(student_id, scan_time)
-                scan_time = time.time()
-                
-        if cv2.getWindowProperty('QR Code Scanner', cv2.WND_PROP_VISIBLE) < 1:
-            break
-        
-    cap.release()
-    cv2.destroyAllWindows()
+    for obj in decodedObjects:
+        if obj.type == 'QRCODE':
+            student_id = obj.data.decode('utf-8')[:10]
+            check_student_id(db, student_id, student_id_list, scanned_id_list, student_fee_check, scan_time)
+            scan_time = time.time()
+            
+    if cv2.getWindowProperty('QR Code Scanner', cv2.WND_PROP_VISIBLE) < 1:
+        break
+    
+cap.release()
+cv2.destroyAllWindows()
