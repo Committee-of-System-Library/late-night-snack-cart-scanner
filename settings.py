@@ -51,7 +51,7 @@ class Settings:
         student_fee_check_frame = LabelFrame(self.window, text="회비 납부 확인 여부")
         student_fee_check_frame.pack(fill="both", expand=True)
         
-        student_fee_check = ["미납", "납부"]
+        student_fee_check = ["확인 안 함", "확인함"]
         self.student_fee_check_cb = ttk.Combobox(student_fee_check_frame, height=5, state="readonly", values=student_fee_check)
         self.student_fee_check_cb.pack()
         self.student_fee_check_cb.current(0)
@@ -71,7 +71,7 @@ class Settings:
     def start(self):
         self.db_path = self.db_path_entry.get()
         self.cam_num = int(self.cam_num_cb.get())
-        self.student_fee_check = False if self.student_fee_check_cb.get() == "미납" else True
+        self.student_fee_check = False if self.student_fee_check_cb.get() == "확인 안 함" else True
         
         self.window.destroy()
         
