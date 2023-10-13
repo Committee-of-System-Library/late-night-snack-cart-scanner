@@ -36,6 +36,24 @@ def config_settings() -> tuple:
     
     return (db_path, cam_num, student_fee_check, cap, db, student_id_list)
 
+def set_pre_scanned_id_list() -> deque:
+    """이전에 인증된 학생의 학번 리스트 설정 함수
+
+    Returns:
+        deque: 이전에 인증된 학생의 학번 리스트
+    """
+    
+    scanned_id_list = deque()
+    
+    try:
+        with open('student_id.txt', 'r+') as f:
+            for line in f.readlines():
+                scanned_id_list.append(line.strip())
+    except FileNotFoundError:
+        with open('student_id.txt', 'w') as f:
+            pass
+            
+    return scanned_id_list
 
 def get_num_of_cam() -> int:
     """연결된 카메라 개수 확인 함수
@@ -129,22 +147,39 @@ def deny_unknown_student(student_id: int) -> None:
     print(f'학번 : {student_id}')
     print('미등록 학생입니다.')
     print('----------------------------------\n')
+    
+def check_student_id(student_id: int, scan_time: time) -> None:
+    """학생 인증 확인 함수
+
+    Args:
+        student_id (int): 학생의 학번
+        scan_time (time): QR코드 스캔 시간
+    """
+    
+    is_registered = student_id in student_id_list
+    
+    if is_registered:
+        is_dues_paid = is_dues_checked(student_fee_check, student_id)
+        is_scanned = student_id in scanned_id_list
+        
+        if is_dues_paid:
+            if not is_scanned:
+                confirm_student(student_id, scanned_id_list)
+            elif time.time() - scan_time > 3:
+                deny_overlap_student(student_id)
+        else:
+            if time.time() - scan_time > 3:
+                deny_dues_not_paid(student_id)
+    else:
+        if time.time() - scan_time > 3:
+            deny_unknown_student(student_id)
 
 
 if __name__ == '__main__':
     db_path, cam_num, student_fee_check, cap, db, student_id_list = config_settings()
     
-    scanned_id_list = deque()
+    scanned_id_list = set_pre_scanned_id_list()
     scan_time = 0
-
-
-    try:
-        with open('student_id.txt', 'r+') as f:
-            for line in f.readlines():
-                scanned_id_list.append(line.strip())
-    except FileNotFoundError:
-        with open('student_id.txt', 'w') as f:
-            pass
             
             
     while True:
@@ -160,27 +195,11 @@ if __name__ == '__main__':
         for obj in decodedObjects:
             if obj.type == 'QRCODE':
                 student_id = obj.data.decode('utf-8')[:10]
-                if is_dues_checked(student_fee_check, student_id) and \
-                        student_id not in scanned_id_list and \
-                        student_id in student_id_list:
-                    scan_time = time.time()
-                    confirm_student(student_id, scanned_id_list)
-                    
-                elif not is_dues_checked(student_fee_check, student_id) and time.time() - scan_time > 3:
-                    scan_time = time.time()
-                    deny_dues_not_paid(student_id)
-                    
-                elif student_id in scanned_id_list and time.time() - scan_time > 3:
-                    scan_time = time.time()
-                    deny_overlap_student(student_id)
-                    
-                elif student_id not in student_id_list and time.time() - scan_time > 3:
-                    scan_time = time.time()
-                    deny_unknown_student(student_id)
-        
+                check_student_id(student_id, scan_time)
+                scan_time = time.time()
+                
         if cv2.getWindowProperty('QR Code Scanner', cv2.WND_PROP_VISIBLE) < 1:
             break
-        
         
     cap.release()
     cv2.destroyAllWindows()
