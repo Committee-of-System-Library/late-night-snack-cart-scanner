@@ -1,6 +1,8 @@
 import cv2
 import pyzbar.pyzbar as pyzbar
 
+from settings import Settings
+
 from collections import deque
 import winsound as ws
 import time
@@ -8,6 +10,23 @@ import pandas as pd
 
 import sys
 
+
+def get_num_of_cam() -> int:
+    """연결된 카메라 개수 확인 함수
+
+    Returns:
+        int: 연결된 카메라 개수
+    """
+    
+    num_of_cam = 0
+    while True:
+        cap = cv2.VideoCapture(num_of_cam)
+        if not cap.read()[0]:
+            break
+        num_of_cam += 1
+        cap.release()
+            
+    return num_of_cam
 
 def confirm_student(student_id, scanned_id_list) -> None:
     """학생 인증 확인 함수
