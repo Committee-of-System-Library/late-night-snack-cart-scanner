@@ -54,7 +54,7 @@ def get_num_of_cam() -> int:
             
     return num_of_cam
 
-def confirm_student(student_id, scanned_id_list) -> None:
+def confirm_student(student_id: int, scanned_id_list: deque) -> None:
     """학생 인증 확인 함수
 
     Args:
@@ -73,7 +73,7 @@ def confirm_student(student_id, scanned_id_list) -> None:
     print('인증되었습니다.')
     print('----------------------------------\n')
     
-def deny_overlap_student(student_id) -> None:
+def deny_overlap_student(student_id: int) -> None:
     """학생 중복 인증 거부 함수
 
     Args:
@@ -87,7 +87,7 @@ def deny_overlap_student(student_id) -> None:
     print('이미 배부받은 학생입니다.')
     print('----------------------------------\n')
     
-def deny_unknown_student(student_id) -> None:
+def deny_unknown_student(student_id: int) -> None:
     """학생 미인증 거부 함수
 
     Args:
