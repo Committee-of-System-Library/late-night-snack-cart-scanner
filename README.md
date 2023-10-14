@@ -1,5 +1,5 @@
 # late-night-snack-cart-scanner
----
+
 경북대학교 컴퓨터학부 야식마차 학생 인증 자동화 시스템입니다.
 
 ## Getting Started
@@ -22,5 +22,6 @@
    - 학생회비 인증 여부: 학생회비 납부자 한정 야식마차를 진행할 때 사용됩니다. 기본값은 '확인 안 함'입니다.
 2. 설정을 다 하면 하단의 실행 버튼을 누르고, 카메라와 연결된 윈도우가 나옵니다.
 3. 크누피아의 학생증 QR을 카메라에 스캔하면 프로그램이 학번, 이름을 인식해 배부 가능 여부를 확인하고, 동시에 배부 명단에 이름과 학번을 작성합니다.
-
+   
+#
 Created by [@Committee of System Library](https://github.com/Committee-of-System-Library), [@easycastle](https://github.com/easycastle)
