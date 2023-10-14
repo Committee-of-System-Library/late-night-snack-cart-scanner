@@ -2,8 +2,9 @@ from tkinter import *
 import tkinter.ttk as ttk
 from tkinter import filedialog
 
+
 class Settings:
-    def __init__(self, db_path, num_of_cam, cam_num, student_fee_check):
+    def __init__(self, db_path, num_of_cam, cam_num, student_fee_check, tray):
         self.db_path = db_path
         self.num_of_cam = num_of_cam
         self.cam_num = cam_num
