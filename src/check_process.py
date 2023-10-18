@@ -95,7 +95,7 @@ def is_dues_checked(db: pd.DataFrame, student_fee_check: bool, student_id: int) 
     if not student_fee_check:
         return True
     else:
-        return True if db[db['student_id'] == str(student_id)]['dues'].tolist()[0] == 1 else False
+        return True if db[db['student_id'] == student_id]['dues'].tolist()[0] == 1 else False
 
 def confirm_student(db: pd.DataFrame, student_id: int, scanned_id_list: deque) -> None:
     """학생 인증 확인 함수
