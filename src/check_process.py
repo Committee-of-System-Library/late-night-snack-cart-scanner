@@ -3,7 +3,10 @@ import pyzbar.pyzbar as pyzbar
 
 import pandas as pd
 import openpyxl
-import winsound as ws
+
+from sound_checker import *
+
+# import pygame
 import time
 
 from settings import Settings
@@ -11,6 +14,13 @@ from settings import Settings
 from collections import deque
 import sys
 
+# pygame.init()
+
+# def play_beep(frequency, duration):
+#     pygame.mixer.init()
+#     beep_sound = pygame.mixer.Sound(pygame.sndarray.samples(pygame.sndarray.array(frequency * pygame.time.Clock.tick(1000) / 1000)))
+#     beep_sound.play()
+#     pygame.time.delay(duration)
 
 def config_settings() -> tuple:
     """프로그램 설정 함수
@@ -34,7 +44,7 @@ def config_settings() -> tuple:
     
     db = pd.read_csv(db_path, usecols=[1, 2, 3]).dropna(subset=['student_id'])
     student_id_list = db['student_id'].tolist()
-    
+
     for i in range(len(student_id_list)):
         if student_id_list[i].isdigit():
             student_id_list[i] = int(student_id_list[i])
@@ -106,7 +116,7 @@ def confirm_student(db: pd.DataFrame, student_id: int, scanned_id_list: deque) -
         scanned_id_list (deque): 인증된 학생의 학번 리스트
     """
     
-    ws.Beep(1000, 100)
+    # play_beep(1000, 100)
     
     scanned_id_list.append(student_id)
     
@@ -126,8 +136,8 @@ def deny_dues_not_paid(student_id: int) -> None:
         student_id (int): 학생의 학번
     """
     
-    ws.Beep(1500, 50)
-    ws.Beep(1500, 50)
+    # play_beep(1500, 50)
+    # play_beep(1500, 50)
     
     print(f'학번 : {student_id}')
     print('회비 미납부 학생입니다.')
@@ -140,8 +150,8 @@ def deny_overlap_student(student_id: int) -> None:
         student_id (int): 학생의 학번
     """
     
-    ws.Beep(500, 50)
-    ws.Beep(500, 50)
+    # play_beep(500, 50)
+    # play_beep(500, 50)
     
     print(f'학번 : {student_id}')
     print('이미 배부받은 학생입니다.')
@@ -154,7 +164,7 @@ def deny_unknown_student(student_id: int) -> None:
         student_id (int): 학생의 학번
     """
     
-    ws.Beep(1500, 400)
+    # play_beep(1500, 400)
     
     print(f'학번 : {student_id}')
     print('미등록 학생입니다.')
@@ -174,7 +184,7 @@ def check_student_id(db: pd.DataFrame, student_id: int, student_id_list: list, \
     """
     
     is_registered = student_id in student_id_list
-    
+
     if is_registered:
         is_dues_paid = is_dues_checked(db, student_fee_check, student_id)
         is_scanned = student_id in scanned_id_list
@@ -182,11 +192,15 @@ def check_student_id(db: pd.DataFrame, student_id: int, student_id_list: list, \
         if is_dues_paid:
             if not is_scanned:
                 confirm_student(db, student_id, scanned_id_list)
+                authorization_sound()
             elif time.time() - scan_time > 3:
                 deny_overlap_student(student_id)
+                deny_overlap_student_sound()
         else:
             if time.time() - scan_time > 3:
                 deny_dues_not_paid(student_id)
+                deny_dues_not_paid_sound()
     else:
         if time.time() - scan_time > 3:
             deny_unknown_student(student_id)
+            deny_unknown_student_sound()
